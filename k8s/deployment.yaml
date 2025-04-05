@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: signconnect-api
+  namespace: backend
+  labels:
+    app: signconnect-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: signconnect-api
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: signconnect-api
+    spec:
+      containers:
+      - name: signconnect-api
+        image: eminataren/signconnect-api:0.1
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 4001
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        env:
+        - name: TF_ENABLE_ONEDNN_OPTS
+          value: "1"
+        - name: TF_CPU_ALLOCATOR_TYPE
+          value: "bfc"
+      imagePullSecrets:
+      - name: dockerhub-secret  # Asegúrate de crear este secreto en tu clúster
+      nodeSelector:
+        kubernetes.io/arch: amd64
